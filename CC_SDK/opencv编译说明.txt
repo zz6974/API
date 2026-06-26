@@ -1,0 +1,2 @@
+opencv4.5.5 如果在编译过程中报错:
+[1] -> std::nullptr_t 的话就在报错的文件里面加入 #include "cstdint" 头文件
