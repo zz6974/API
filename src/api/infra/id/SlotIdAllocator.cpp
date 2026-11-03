@@ -8,6 +8,7 @@ SlotIdAllocator::SlotIdAllocator(int capacity)
 
 common::Result<int> SlotIdAllocator::Allocate() {
     std::lock_guard<std::mutex> lock(mutex_);
+    // 线性扫第一个空槽（简单策略，容量小无需优化）
     for (size_t i = 0; i < slots_.size(); i++) {
         if (!slots_[i]) {
             slots_[i] = true;
@@ -19,7 +20,7 @@ common::Result<int> SlotIdAllocator::Allocate() {
 
 void SlotIdAllocator::Release(int id) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (id >= 0 && static_cast<size_t>(id) < slots_.size()) {
+    if (id >= 0 && static_cast<size_t>(id) < slots_.size()) { // 越界防御
         slots_[static_cast<size_t>(id)] = false;
     }
 }

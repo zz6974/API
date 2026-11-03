@@ -22,18 +22,19 @@ common::Result<std::string> FilePhotoRepository::Save(int deviceId,
     auto now = std::chrono::system_clock::now().time_since_epoch();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
 
+    // 随机后缀降低同毫秒写入的碰撞概率
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 0xFFFFF);
     char randStr[5];
     snprintf(randStr, sizeof(randStr), "%04x", dis(gen));
 
-    // 与旧实现保持一致的文件名格式
+    // 与旧实现保持一致的文件名格式：毫秒时间戳 + 随机串
     std::string filename = "_" + std::to_string(ms) + "_" + randStr + ".jpg";
     std::string fullpath = photoDir_ + "/" + filename;
 
     {
-        std::unique_lock<std::shared_mutex> lock(mutex_);
+        std::unique_lock<std::shared_mutex> lock(mutex_); // 独占锁：写盘期间禁止并发读目录
         std::ofstream out(fullpath, std::ios::binary);
         if (!out) {
             return common::Result<std::string>::Fail(
@@ -49,14 +50,14 @@ common::Result<std::vector<char>> FilePhotoRepository::Load(const std::string& p
     std::string fullPath = photoDir_ + "/" + photoId;
 
     std::shared_lock<std::shared_mutex> lock(mutex_);
-    std::ifstream in(fullPath, std::ios::binary | std::ios::ate);
+    std::ifstream in(fullPath, std::ios::binary | std::ios::ate); // ate：直接定位到末尾取文件大小
     if (!in) {
         return common::Result<std::vector<char>>::Fail(
             common::ErrorCode::kNotFound, "照片不存在: " + photoId);
     }
 
-    size_t size = in.tellg();
-    in.seekg(0);
+    size_t size = in.tellg(); // 文件大小
+    in.seekg(0);              // 回到开头准备读
 
     std::vector<char> data(size);
     in.read(data.data(), static_cast<std::streamsize>(size));
@@ -65,9 +66,10 @@ common::Result<std::vector<char>> FilePhotoRepository::Load(const std::string& p
 
 common::Result<std::vector<std::string>> FilePhotoRepository::List(int deviceId) {
     std::vector<std::string> result;
-    std::string prefix = std::to_string(deviceId) + "_";
+    std::string prefix = std::to_string(deviceId) + "_"; // 按文件名前缀过滤设备照片
 
 #ifdef _WIN32
+    // Win32 文件枚举 API，无需第三方库
     std::string pattern = photoDir_ + "/" + prefix + "*.jpg";
     WIN32_FIND_DATA fd;
     HANDLE hFind = FindFirstFile(pattern.c_str(), &fd);
@@ -78,6 +80,7 @@ common::Result<std::vector<std::string>> FilePhotoRepository::List(int deviceId)
         FindClose(hFind);
     }
 #else
+    // POSIX 目录遍历
     DIR* dir = opendir(photoDir_.c_str());
     if (dir) {
         struct dirent* entry;

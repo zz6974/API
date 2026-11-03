@@ -11,6 +11,7 @@ void HttpServer::Init(const common::ServerConfig& config, Router& router) {
     port_ = config.httpPort;
 
     server_.Init(address_.c_str(), port_);
+    // 所有请求统一交给 Router；路由未命中回 404
     server_.SetWebServletFun([this](CTL::Request& req, CTL::Response& res) {
         if (!router_->Route(req, res)) {
             res.SetHeader("Content-Type", "application/json; charset=utf-8");

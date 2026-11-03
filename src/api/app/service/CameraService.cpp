@@ -26,6 +26,7 @@ common::Result<std::vector<char>> CameraService::GetFrame(int deviceId) {
     }
     auto frame = channel->GetLatestFrame();
     if (frame.empty()) {
+        // 设备在线但还没推过帧
         return common::Result<std::vector<char>>::Fail(
             common::ErrorCode::kNotFound, "该设备暂无可用帧");
     }
@@ -39,6 +40,7 @@ common::Result<domain::PhotoMeta> CameraService::TakePhoto(int deviceId) {
             common::ErrorCode::kDeviceOffline, "设备不存在或已离线");
     }
 
+    // 第一步：指令拍照并等待回传（通道内部条件变量同步，超时返回 kTimeout）
     auto photo = channel->TakePhoto(photoTimeoutMs_);
     if (photo.IsFail()) {
         return common::Result<domain::PhotoMeta>::Fail(photo.Code(), photo.Message());
@@ -48,11 +50,13 @@ common::Result<domain::PhotoMeta> CameraService::TakePhoto(int deviceId) {
             common::ErrorCode::kTimeout, "拍照超时，设备未回传照片");
     }
 
+    // 第二步：落盘，拿到唯一 photoId
     auto saved = photos_->Save(deviceId, photo.Value());
     if (saved.IsFail()) {
         return common::Result<domain::PhotoMeta>::Fail(saved.Code(), saved.Message());
     }
 
+    // 第三步：组装元信息返回
     domain::PhotoMeta meta;
     meta.photoId = saved.Value();
     meta.deviceId = deviceId;
@@ -82,6 +86,7 @@ common::Result<void> CameraService::StopStream(int deviceId) {
 
 std::shared_ptr<ICameraChannel> CameraService::FindOnline(int deviceId) {
     auto channel = channels_->Find(deviceId);
+    // 会话存在但心跳超时也视为离线
     if (!channel || !channel->IsOnline()) {
         return nullptr;
     }

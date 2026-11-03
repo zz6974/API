@@ -28,9 +28,9 @@ void CameraChannelManager::Start(int port) {
 }
 
 void CameraChannelManager::Stop() {
-    running_ = false;
+    running_ = false;          // 先关开关，让 AcceptLoop 退出循环
     if (serverSocket_) {
-        serverSocket_->close();
+        serverSocket_->close(); // 关闭监听，让阻塞中的 accept 返回 nullptr
     }
     if (acceptThread_.joinable()) {
         acceptThread_.join();
@@ -40,7 +40,7 @@ void CameraChannelManager::Stop() {
     {
         std::unique_lock<std::shared_mutex> lock(sessionsMutex_);
         for (auto& [id, _] : sessions_) {
-            allocator_->Release(id);
+            allocator_->Release(id); // 会话销毁前先把 ID 还给池子
         }
         sessions_.clear();
     }
@@ -70,13 +70,14 @@ void CameraChannelManager::AcceptLoop() {
     while (running_) {
         CTL::ClientSocket* sock = serverSocket_->accept();
         if (!sock) {
-            if (running_) continue;
-            break;
+            if (running_) continue; // 意外失败但服务还在，继续下一轮
+            break;                  // 服务已停止，退出
         }
 
         auto session = std::make_shared<TcpCameraChannel>(
             *sock, allocator_, account_, password_);
 
+        // 等待终端发 RequestID 完成注册（session 内部收到后调用 Allocate）
         auto deadline = std::chrono::steady_clock::now()
                       + std::chrono::milliseconds(registerTimeoutMs_);
         while (running_ && std::chrono::steady_clock::now() < deadline) {
@@ -85,6 +86,7 @@ void CameraChannelManager::AcceptLoop() {
         }
         if (!running_) break;
         if (session->DeviceId() < 0) {
+            // 超时未注册：session 出作用域销毁，socket 随其析构关闭
             LOG_WARN("[CameraChannelManager] 注册超时，关闭连接");
             continue;
         }

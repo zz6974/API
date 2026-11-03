@@ -17,11 +17,13 @@ void AuthController::HandleLogin(CTL::Request& req, CTL::Response& res, const Pa
         WriteError(res, ToHttpStatus(body.Code()), body.Message());
         return;
     }
+    // 字段缺失时取空串，交给 AuthService 判定（必失败）
     std::string account = body.Value().value("Account", "");
     std::string password = body.Value().value("Password", "");
 
     auto result = service_->Authenticate(account, password);
     if (result.IsFail()) {
+        // 账号密码错误 -> 401
         WriteError(res, ToHttpStatus(result.Code()), result.Message());
         return;
     }

@@ -4,15 +4,18 @@ project(API)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(CC_SDK)
+add_subdirectory(CC_SDK) # 先构建 SDK，其导出的 CC_API 目标被各层链接
 
 if(DEFINED ENV{OpenCV_DIR})
-    set(OpenCV_DIR $ENV{OpenCV_DIR})
+    set(OpenCV_DIR $ENV{OpenCV_DIR}) # 从环境变量接 OpenCV 安装路径
 endif()
 find_package(OpenCV REQUIRED)
 
 set(API_INC_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(NLOHMANN_INC ${CMAKE_CURRENT_SOURCE_DIR}/CC_SDK/Environment/mirrors_nlohmann_json/include)
+
+# 分层构建顺序：每层只链接下一层，依赖方向在编译期被强制
+# api_common -> api_domain -> api_application -> (api_web | api_infrastructure) -> API
 
 # ============================================================
 # 1. common 公共层：Result / ErrorCode / Logger / Config

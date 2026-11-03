@@ -6,17 +6,29 @@
 
 namespace api::web {
 
-// 认证控制器：路由 /api/login
+/**
+ * @brief 认证控制器
+ *
+ * 路由 /api/login。
+ */
 class AuthController : public BaseController {
 public:
+    /**
+     * @brief 构造
+     * @param service 认证用例服务
+     */
     explicit AuthController(std::shared_ptr<app::AuthService> service);
 
-    void RegisterRoutes(Router& router);
+    /**
+     * @brief 注册路由
+     * @param router 路由表
+     */
+    void RegisterRoutes(Router& router); // 注册 1 条路由：登录
 
 private:
-    void HandleLogin(CTL::Request& req, CTL::Response& res, const PathParams& params);
+    void HandleLogin(CTL::Request& req, CTL::Response& res, const PathParams& params); ///< 校验 POST 体里的 Account / Password
 
-    std::shared_ptr<app::AuthService> service_;
+    std::shared_ptr<app::AuthService> service_; ///< 认证用例服务
 };
 
 } // namespace api::web
