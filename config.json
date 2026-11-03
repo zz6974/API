@@ -1,0 +1,13 @@
+{
+    "httpAddress": "192.168.1.175",
+    "httpPort": 8082,
+    "tcpPort": 8083,
+    "wsAddress": "192.168.1.175",
+    "wsPort": 8081,
+    "photoDir": "./photos",
+    "photoTimeoutMs": 5000,
+    "registerTimeoutMs": 5000,
+    "onlineTimeoutSeconds": 30,
+    "account": "123456",
+    "password": "123456"
+}

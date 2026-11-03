@@ -1,49 +1,26 @@
-#include <iostream>
-#include <thread>
-
-#include "../include/Analysis.h"
-#include "../include/CameraManager.h"
-#include "../include/HeadBeat.h"
-#include "CCServlet/CCWebServlet.h"
-
-#define Address "192.168.1.175"
-#define Port 8082
+#include "api/AppContext.h"
+#include "api/common/Config.h"
+#include "api/common/Logger.h"
 
 int main() {
     system("chcp 65001");
 
-    Headbeat heartbeat;
-    heartbeat.Start();//8083
+    api::common::Logger::Instance().SetLevel(api::common::Logger::Level::kInfo);
 
-    Analysis analysis;
-    analysis.Init();
-
-    CameraManager::Instance().Start(8083);
-
-    CTL::WebServlet server;
-    server.Init(Address, Port);
-
-    for (const auto& [path, _] : analysis.GetRoutes()) {
-        server.SetWebServlet(path, [&analysis](CTL::Request& req, CTL::Response& res) {
-            int status = 200;
-            std::string body = analysis.HandleRequest(req, status);
-            res.SetHeader("Content-Type",   "application/json; charset=utf-8");
-            res.SetHeader("Content-Length", std::to_string(body.size()));
-            res.Write(body, status);
-        });
+    // 加载运行配置；失败时回退默认配置
+    auto config = api::common::ServerConfig::LoadFromJson("config.json");
+    if (config.IsFail()) {
+        LOG_WARN("加载 config.json 失败(%s)，使用默认配置", config.Message().c_str());
+        config = api::common::Result<api::common::ServerConfig>::Ok(
+            api::common::ServerConfig::Default());
     }
 
-    server.SetWebServletFun([&analysis](CTL::Request& req, CTL::Response& res) {
-        int status = 200;
-        std::string body = analysis.HandleRequest(req, status);
-        res.SetHeader("Content-Type",   "application/json; charset=utf-8");
-        res.SetHeader("Content-Length", std::to_string(body.size()));
-        res.Write(body, status);
-    });
+    api::AppContext app;
+    if (!app.Init(config.Value())) {
+        LOG_ERROR("应用初始化失败");
+        return 1;
+    }
 
-    std::cerr << "[Thread " << std::this_thread::get_id()
-              << "] [Server] 启动在 " << Address << ":" << Port << std::endl;
-
-    server.Running();
+    app.Run();
     return 0;
 }
