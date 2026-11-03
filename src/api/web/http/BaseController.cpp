@@ -4,6 +4,7 @@
 
 namespace api::web {
 
+// 错误码 -> HTTP 状态码映射：与 ErrorCode.h 一一对应
 int BaseController::ToHttpStatus(common::ErrorCode code) {
     using EC = common::ErrorCode;
     switch (code) {
@@ -44,6 +45,7 @@ common::Result<nlohmann::json> BaseController::ParseJsonBody(CTL::Request& req) 
         return common::Result<nlohmann::json>::Ok(
             nlohmann::json::parse(req.RequestData.Body.toString()));
     } catch (const std::exception&) {
+        // 解析失败统一回参数错误，不区分具体异常类型
         return common::Result<nlohmann::json>::Fail(
             common::ErrorCode::kInvalidArgument, "Body 不是合法 JSON");
     }

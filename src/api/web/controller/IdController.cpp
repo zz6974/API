@@ -18,6 +18,7 @@ void IdController::HandleGetId(CTL::Request& req, CTL::Response& res, const Path
         return;
     }
     int id = result.Value();
+    // 键为 "camN"（如 cam3），值为数字 N，兼容终端注册时回填的 id 字段
     WriteJson(res, {{std::string("cam") + std::to_string(id), id}});
 }
 

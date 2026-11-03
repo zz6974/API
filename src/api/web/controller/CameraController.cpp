@@ -8,6 +8,7 @@ CameraController::CameraController(std::shared_ptr<app::CameraService> service)
 }
 
 void CameraController::RegisterRoutes(Router& router) {
+    // {id} 为占位符，Router 匹配后放入 PathParams 的 "id" 键
     router.Add("GET",  "/api/camera/list",              [this](auto& req, auto& res, auto& p) { HandleList(req, res, p); });
     router.Add("GET",  "/api/camera/{id}/frame",        [this](auto& req, auto& res, auto& p) { HandleFrame(req, res, p); });
     router.Add("POST", "/api/camera/{id}/photo",        [this](auto& req, auto& res, auto& p) { HandleTakePhoto(req, res, p); });
@@ -16,6 +17,7 @@ void CameraController::RegisterRoutes(Router& router) {
 }
 
 void CameraController::HandleList(CTL::Request& req, CTL::Response& res, const PathParams&) {
+    // 返回 {"devices":[...], "count":N}
     auto result = service_->GetOnlineDevices();
     if (result.IsFail()) {
         WriteError(res, ToHttpStatus(result.Code()), result.Message());
@@ -28,6 +30,7 @@ void CameraController::HandleList(CTL::Request& req, CTL::Response& res, const P
 void CameraController::HandleFrame(CTL::Request& req, CTL::Response& res, const PathParams& params) {
     int deviceId = GetIntParam(params, "id");
     if (deviceId < 0) {
+        // 路径参数缺失或非数字，直接拒绝
         WriteError(res, 400, "非法设备 ID");
         return;
     }
@@ -51,6 +54,7 @@ void CameraController::HandleTakePhoto(CTL::Request& req, CTL::Response& res, co
         return;
     }
     const auto& meta = result.Value();
+    // 拍照成功：回传元信息（编号 / 设备 / 字节数），照片本体通过 /api/photo/{photoId} 拉取
     WriteJson(res, {
         {"photoId", meta.photoId},
         {"deviceId", meta.deviceId},
@@ -60,6 +64,7 @@ void CameraController::HandleTakePhoto(CTL::Request& req, CTL::Response& res, co
 
 void CameraController::HandleStartStream(CTL::Request& req, CTL::Response& res, const PathParams& params) {
     int deviceId = GetIntParam(params, "id");
+    // 服务层负责检查设备在线，控制器无需关心
     auto result = service_->StartStream(deviceId);
     if (result.IsFail()) {
         WriteError(res, ToHttpStatus(result.Code()), result.Message());

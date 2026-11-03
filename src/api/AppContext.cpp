@@ -17,7 +17,7 @@
 namespace api {
 
 AppContext::AppContext() = default;
-AppContext::~AppContext() { Shutdown(); }
+AppContext::~AppContext() { Shutdown(); } // 析构兜底：确保后台线程都停下
 
 bool AppContext::Init(const common::ServerConfig& config) {
     config_ = config;
@@ -47,10 +47,10 @@ bool AppContext::Init(const common::ServerConfig& config) {
     authController->RegisterRoutes(router_);
     idController->RegisterRoutes(router_);
 
-    // 4. HTTP 服务器
+    // 4. HTTP 服务器（先初始化，后随 Run 阻塞启动）
     httpServer_.Init(config_, router_);
 
-    // 5. 后台服务启动
+    // 5. 后台服务启动：TCP 通道 / UDP 心跳 / WS 推流
     channelManager_->Start(config_.tcpPort);
     heartbeat_->Start(config_.httpAddress, config_.httpPort, 0);
     webSocketStream_->Start(config_.wsAddress, config_.wsPort);
@@ -61,10 +61,11 @@ bool AppContext::Init(const common::ServerConfig& config) {
 }
 
 void AppContext::Run() {
-    httpServer_.Run();
+    httpServer_.Run(); // 阻塞直到进程退出
 }
 
 void AppContext::Shutdown() {
+    // 与启动顺序相反：先停消费方再停供应方，避免停服瞬间的竞态
     if (webSocketStream_) webSocketStream_->Stop();
     if (heartbeat_) heartbeat_->Stop();
     if (channelManager_) channelManager_->Stop();

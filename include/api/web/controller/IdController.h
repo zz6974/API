@@ -6,17 +6,29 @@
 
 namespace api::web {
 
-// 设备 ID 控制器：路由 /api/GetID
+/**
+ * @brief 设备 ID 控制器
+ *
+ * 路由 /api/GetID。
+ */
 class IdController : public BaseController {
 public:
+    /**
+     * @brief 构造
+     * @param allocator ID 分配器（端口接口）
+     */
     explicit IdController(std::shared_ptr<app::IIdAllocator> allocator);
 
-    void RegisterRoutes(Router& router);
+    /**
+     * @brief 注册路由
+     * @param router 路由表
+     */
+    void RegisterRoutes(Router& router); // 注册 1 条路由：取设备 ID
 
 private:
-    void HandleGetId(CTL::Request& req, CTL::Response& res, const PathParams& params);
+    void HandleGetId(CTL::Request& req, CTL::Response& res, const PathParams& params); ///< 从 ID 池取一个空闲号并占用
 
-    std::shared_ptr<app::IIdAllocator> allocator_;
+    std::shared_ptr<app::IIdAllocator> allocator_; ///< 直接注入端口接口（无需用例层中转）
 };
 
 } // namespace api::web

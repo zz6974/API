@@ -21,6 +21,6 @@ int main() {
         return 1;
     }
 
-    app.Run();
+    app.Run(); // 阻塞运行 HTTP 服务，进程结束前不返回
     return 0;
 }

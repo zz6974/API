@@ -39,19 +39,21 @@ void WebSocketStreamService::Stop() {
 }
 
 void WebSocketStreamService::StreamLoop(CTL::WebSocketInfo& info) {
-    while (info.GetConnectFlag()) {
+    while (info.GetConnectFlag()) { // 客户端断开时循环退出
         auto devices = channels_->OnlineDevices();
         if (devices.empty()) {
+            // 没有在线设备，慢速空转
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
-        auto channel = channels_->Find(devices[0]);
+        auto channel = channels_->Find(devices[0]); // 旧逻辑沿用：默认推第一台设备
         if (!channel) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
         auto frame = channel->GetLatestFrame();
         if (frame.empty()) {
+            // 设备在线但还没帧，快速重试
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
         }

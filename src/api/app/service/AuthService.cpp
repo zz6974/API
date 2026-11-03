@@ -9,6 +9,7 @@ AuthService::AuthService(std::string account, std::string password)
 
 common::Result<void> AuthService::Authenticate(const std::string& account,
                                                const std::string& password) const {
+    // 简单等值比较；与配置不符即拒绝
     if (account != account_ || password != password_) {
         return common::Result<void>::Fail(common::ErrorCode::kUnauthorized, "账号或密码错误");
     }

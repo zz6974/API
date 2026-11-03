@@ -9,6 +9,7 @@ namespace api::infra {
 
 namespace {
 
+// 毫秒级时间戳（steady_clock 单调递增，适合测 RTT）
 uint64_t NowMs() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now().time_since_epoch()
@@ -28,7 +29,7 @@ void UdpHeartbeatService::Start(const std::string& address, int port, int device
     port_ = port;
 
     socket_ = new CTL::DatagramSocket(port, CTL::InetAddress(address));
-    socket_->setSockOpt(BROADCAST);
+    socket_->setSockOpt(BROADCAST); // 开广播选项，心跳依赖子网广播发现
 
     isRunning_ = true;
     sendThread_ = std::thread([this] { SendLoop(); });
@@ -36,7 +37,7 @@ void UdpHeartbeatService::Start(const std::string& address, int port, int device
 }
 
 void UdpHeartbeatService::Stop() {
-    isRunning_ = false;
+    isRunning_ = false; // 原子开关，两条循环各自退出
 
     if (sendThread_.joinable()) sendThread_.join();
     if (recvThread_.joinable()) recvThread_.join();
@@ -48,7 +49,7 @@ void UdpHeartbeatService::Stop() {
 void UdpHeartbeatService::SendHeartbeat() {
     HeartbeatPacket packet{};
     std::strncpy(packet.type, "HEARTBEAT", sizeof(packet.type));
-    packet.deviceId = deviceId_++;
+    packet.deviceId = deviceId_++; // 每次广播序号 +1，供对端区分新旧心跳
     packet.timestamp = NowMs();
 
     CTL::ByteArray data(reinterpret_cast<const char*>(&packet), sizeof(packet));
@@ -62,7 +63,7 @@ void UdpHeartbeatService::SendLoop() {
     while (isRunning_) {
         SendHeartbeat();
 
-        // 等待回复（最多 3 秒）
+        // 等一个 ACK（最多 3 秒）：收到即完成 UDP 打洞，对端后续可直连本机
         auto deadline = std::chrono::steady_clock::now()
                       + std::chrono::milliseconds(3000);
         while (isRunning_ && std::chrono::steady_clock::now() < deadline) {
@@ -71,10 +72,10 @@ void UdpHeartbeatService::SendLoop() {
                 socket_->receive(packet);
                 break;
             }
-            CTL::Thread::SleepMS(10);
+            CTL::Thread::SleepMS(10); // 非阻塞轮询 + 小睡，避免忙等
         }
 
-        // 休息 5 秒
+        // 休息 5 秒后进入下一轮心跳
         for (int i = 0; i < 50 && isRunning_; i++) {
             CTL::Thread::SleepMS(100);
         }
@@ -87,12 +88,13 @@ void UdpHeartbeatService::RecvLoop() {
         try {
             socket_->receive(packet);
         } catch (...) {
+            // 接收失败（如 socket 已关）短暂退避，避免异常风暴
             std::this_thread::sleep_for(std::chrono::milliseconds(3000));
             continue;
         }
 
         if (packet.getLength() < sizeof(HeartbeatPacket))
-            continue;
+            continue; // 残缺包直接忽略
 
         HeartbeatPacket pkt{};
         std::memcpy(&pkt, packet.getData(), sizeof(pkt));
