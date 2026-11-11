@@ -19,6 +19,8 @@ public:
      * @brief 单例入口（本模块唯一的全局状态，线程安全）
      * @return 全局唯一 Logger 实例
      */
+    Logger(const Logger& logger) = delete;
+    Logger& operator=(const Logger& logger) = delete;
     static Logger& Instance() {
         static Logger logger;
         return logger;
@@ -73,6 +75,7 @@ private:
 } // namespace api::common
 
 // 日志宏：自动把当前函数名（__func__）作为 tag
+//两个核心作用：节省代码，提高可读性 /  自动添加调用的那个函数的函数名
 #define LOG_DEBUG(fmt, ...) ::api::common::Logger::Instance().Log(::api::common::Logger::Level::kDebug, __func__, fmt, ##__VA_ARGS__)
 #define LOG_INFO(fmt, ...)  ::api::common::Logger::Instance().Log(::api::common::Logger::Level::kInfo,  __func__, fmt, ##__VA_ARGS__)
 #define LOG_WARN(fmt, ...)  ::api::common::Logger::Instance().Log(::api::common::Logger::Level::kWarn,  __func__, fmt, ##__VA_ARGS__)

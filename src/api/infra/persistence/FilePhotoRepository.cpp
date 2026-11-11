@@ -71,12 +71,12 @@ common::Result<std::vector<std::string>> FilePhotoRepository::List(int deviceId)
 #ifdef _WIN32
     // Win32 文件枚举 API，无需第三方库
     std::string pattern = photoDir_ + "/" + prefix + "*.jpg";
-    WIN32_FIND_DATA fd;
-    HANDLE hFind = FindFirstFile(pattern.c_str(), &fd);
+    WIN32_FIND_DATAA fd;
+    HANDLE hFind = FindFirstFileA(pattern.c_str(), &fd);
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             result.push_back(fd.cFileName);
-        } while (FindNextFile(hFind, &fd));
+        } while (FindNextFileA(hFind, &fd));
         FindClose(hFind);
     }
 #else

@@ -46,7 +46,7 @@ void WebSocketStreamService::StreamLoop(CTL::WebSocketInfo& info) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
-        auto channel = channels_->Find(devices[0]); // 旧逻辑沿用：默认推第一台设备
+        auto channel = channels_->Find(devices[0]);
         if (!channel) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;

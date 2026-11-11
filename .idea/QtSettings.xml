@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="QtSettings">
+    <option name="mySettingsPerProfile">
+      <map>
+        <entry key="">
+          <value>
+            <PerProfileState>
+              <option name="myCustomQmlPath" value="D:\qt\6.8.3\mingw_64\qml\QML" />
+              <option name="myCustomQtBinPath" value="D:\qt\6.8.3\mingw_64\bin" />
+            </PerProfileState>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

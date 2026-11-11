@@ -4,6 +4,14 @@ project(API)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# ============================================================
+# Qt6：仅含 UI 的目标开启 moc/uic 自动处理（见 api_infrastructure）
+# ============================================================
+if(EXISTS "D:/qt/6.8.3/mingw_64")
+    list(APPEND CMAKE_PREFIX_PATH "D:/qt/6.8.3/mingw_64")
+endif()
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
 add_subdirectory(CC_SDK) # 先构建 SDK，其导出的 CC_API 目标被各层链接
 
 if(DEFINED ENV{OpenCV_DIR})
@@ -77,12 +85,24 @@ add_library(api_infrastructure STATIC
     src/api/infra/net/WebSocketStreamService.cpp
     src/api/infra/persistence/FilePhotoRepository.cpp
     src/api/infra/id/SlotIdAllocator.cpp
+        src/UI/cameraui.cpp
+        include/UI/cameraui.h
+        src/UI/cameraui.ui
+)
+# 仅本目标包含 Q_OBJECT / .ui 文件，在此开启 Qt 自动生成处理
+set_target_properties(api_infrastructure PROPERTIES
+        AUTOGEN_BUILD_DIR "${CMAKE_BINARY_DIR}/autogen_files"
+)
+set_target_properties(api_infrastructure PROPERTIES
+    AUTOMOC ON
+    AUTOUIC ON
+    AUTORCC ON
 )
 target_include_directories(api_infrastructure PUBLIC
     ${API_INC_DIR}
     ${CC_API_INC}
 )
-target_link_libraries(api_infrastructure PUBLIC api_application CC_API)
+target_link_libraries(api_infrastructure PUBLIC api_application CC_API Qt6::Widgets)
 
 # ============================================================
 # 6. 可执行程序：组合根装配
@@ -90,6 +110,8 @@ target_link_libraries(api_infrastructure PUBLIC api_application CC_API)
 add_executable(API
     src/main.cpp
     src/api/AppContext.cpp
+        src/api/web/controller/StaticController.cpp
+        include/api/web/controller/StaticController.h
 )
 target_include_directories(API PUBLIC
     ${API_INC_DIR}

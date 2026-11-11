@@ -12,7 +12,7 @@ class WebSocketInfo;
 namespace api::infra {
 
 /**
- * @brief WebSocket 推流服务（由旧 URL::Init / URL::Onopen 迁移）
+ * @brief WebSocket 推流服务
  *
  * 在独立端口向前端持续推送摄像头实时帧。
  */
