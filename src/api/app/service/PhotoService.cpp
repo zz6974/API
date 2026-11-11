@@ -25,4 +25,5 @@ common::Result<std::vector<std::string>> PhotoService::ListPhotos(int deviceId) 
     return repository_->List(deviceId);
 }
 
+
 } // namespace api::app

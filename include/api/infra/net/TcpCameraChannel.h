@@ -16,10 +16,10 @@
 namespace api::infra {
 
 /**
- * @brief 与一个摄像头终端的 TCP 通道（由旧 CameraSession 平移改造）
+ * @brief 与一个摄像头终端的 TCP 通道
  *
  * 实现 app::ICameraChannel 端口。
- * - ID 分配由注入的 IIdAllocator 提供（替代全局 GetID）
+ * - ID 分配由注入的 IIdAllocator 提供
  * - TakePhoto 返回 Result<vector<char>>
  * - 协议常量统一用 api::domain::protocol
  */
