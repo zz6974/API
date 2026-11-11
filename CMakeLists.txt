@@ -110,6 +110,8 @@ target_link_libraries(api_infrastructure PUBLIC api_application CC_API Qt6::Widg
 add_executable(API
     src/main.cpp
     src/api/AppContext.cpp
+        src/api/web/controller/StaticController.cpp
+        include/api/web/controller/StaticController.h
 )
 target_include_directories(API PUBLIC
     ${API_INC_DIR}
