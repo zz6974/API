@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>摄像头监控系统</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== 视图 1：登录 ==================== -->
+  <div id="loginView" class="login-wrap">
+    <div class="login-shell">
+      <section class="login-brand">
+        <div class="brand-mark"><span></span></div>
+        <h1>摄像头监控系统</h1>
+        <p class="brand-sub">实时画面 · 远程拍照 · 照片归档</p>
+        <ul class="brand-points">
+        </ul>
+        <p class="brand-foot">Camera Control Platform</p>
+      </section>
+
+      <form id="loginForm" class="login-form" autocomplete="on">
+        <div class="form-head">
+          <h2>登录控制台</h2>
+        </div>
+
+        <div class="field">
+          <label for="accountInput">账号</label>
+          <input id="accountInput" name="account" autocomplete="username" placeholder="请输入账号">
+        </div>
+
+        <div class="field">
+          <label for="passwordInput">密码</label>
+          <input id="passwordInput" name="password" type="password"
+                 autocomplete="current-password" placeholder="请输入密码">
+        </div>
+
+        <button id="loginBtn" class="btn block" type="submit">登 录</button>
+        <p id="loginMsg" class="msg"></p>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== 视图 2：控制台 ==================== -->
+  <div id="consoleView" class="hidden">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-logo"><span></span></span>
+        <div class="brand-text">
+          <h1>摄像头监控系统</h1>
+          <p class="brand-cap">Camera Control Platform</p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <span id="statusText" class="status">未连接</span>
+        <span class="divider"></span>
+        <button id="logoutBtn" class="btn ghost small" type="button">退出</button>
+      </div>
+    </header>
+
+    <main class="app-body">
+      <!-- ---------- 左：设备 ---------- -->
+      <aside class="panel sidebar">
+        <div class="panel-head">
+          <h2>在线设备</h2>
+          <button id="refreshBtn" class="btn ghost small" type="button">刷新</button>
+        </div>
+
+        <div id="deviceList" class="device-list">
+          <p class="placeholder">加载中…</p>
+        </div>
+
+        <p class="sidebar-foot">终端通过 UDP 心跳上报在线状态</p>
+      </aside>
+
+      <!-- ---------- 右：画面 + 照片 ---------- -->
+      <div class="content">
+        <section class="panel video-panel">
+          <div class="panel-head">
+            <h2>实时画面</h2>
+            <span id="frameDevice" class="badge">未选择</span>
+          </div>
+
+          <div class="frame-box">
+            <img id="frameImg" alt="实时画面" hidden>
+            <p id="frameHint" class="frame-hint">请先在左侧选择设备</p>
+
+            <div class="frame-overlay">
+              <span class="live-tag">LIVE</span>
+              <div class="overlay-actions">
+                <p id="actionMsg" class="overlay-msg"></p>
+                <button id="photoBtn" class="btn small-solid" type="button" disabled>拍 照</button>
+                <button id="pauseBtn" class="btn small-ghost" type="button" disabled>暂停</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel gallery-panel">
+          <div class="panel-head">
+            <h2>照片库</h2>
+            <span id="galleryCount" class="badge">0 张</span>
+          </div>
+
+          <div class="gallery-body">
+            <div id="gallery" class="gallery"></div>
+            <div id="galleryEmpty" class="empty-state">
+              <span class="empty-icon"></span>
+              <p>选择设备后自动加载该设备的照片</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- tsc 把 Web_UI/app.ts 编译到 www/app.js -->
+  <script src="app.js" defer></script>
+</body>
+</html>

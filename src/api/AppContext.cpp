@@ -13,6 +13,7 @@
 #include "api/web/controller/CameraController.h"
 #include "api/web/controller/IdController.h"
 #include "api/web/controller/PhotoController.h"
+#include "api/web/controller/StaticController.h"
 
 namespace api {
 
@@ -49,6 +50,8 @@ bool AppContext::Init(const common::ServerConfig& config) {
 
     // 4. HTTP 服务器（先初始化，后随 Run 阻塞启动）
     httpServer_.Init(config_, router_);
+    auto staticController = std::make_shared<web::StaticController>("www"); // 相对工作目录
+    staticController->RegisterRoutes(router_);
 
     // 5. 后台服务启动：TCP 通道 / UDP 心跳 / WS 推流
     channelManager_->Start(config_.tcpPort);
