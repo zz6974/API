@@ -27,7 +27,6 @@ public:
 
 private:
     void HandleLogin(CTL::Request& req, CTL::Response& res, const PathParams& params); ///< 校验 POST 体里的 Account / Password
-
     std::shared_ptr<app::AuthService> service_; ///< 认证用例服务
 };
 

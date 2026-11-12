@@ -7,10 +7,11 @@
 namespace api::web {
     class StaticController {
     public:
-        StaticController(std::string router) : Router(router) {};
+        StaticController(std::string router) : Router(std::move(router)) {};
         ~StaticController();
         void RegisterRoutes(api::web::Router& router);
     private:
+        void ServeFile(CTL::Response &res , const std::string &fileName , const std::string &contentType);
         std::string Router;
     };
 }
