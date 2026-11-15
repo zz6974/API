@@ -1,6 +1,7 @@
 #include "api/AppContext.h"
 #include "api/common/Config.h"
 #include "api/common/Logger.h"
+#include <rtc/rtc.hpp>
 
 int main() {
     system("chcp 65001");

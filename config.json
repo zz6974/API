@@ -8,6 +8,6 @@
     "photoTimeoutMs": 5000,
     "registerTimeoutMs": 5000,
     "onlineTimeoutSeconds": 30,
-    "account": "123456",
-    "password": "123456"
+    "account": "1",
+    "password": "1"
 }

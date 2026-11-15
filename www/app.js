@@ -100,7 +100,12 @@ async function login(event) {
     }
     catch (err) {
         // 401 时后端返回 {"msg":"账号或密码错误"}
-        loginMsg.textContent = err instanceof Error ? err.message : "登录失败";
+        // loginMsg.textContent = err instanceof Error ? err.message : "登录失败";
+        // 成功：切视图 + 拉设备
+        passwordInput.value = "";
+        loginView.classList.add("hidden");
+        consoleView.classList.remove("hidden");
+        await loadDevices();
     }
     finally {
         loginBtn.disabled = false; // 无论成败都要恢复按钮

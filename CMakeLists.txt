@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 4.2)
 project(API)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ============================================================
@@ -13,6 +13,18 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 add_subdirectory(CC_SDK) # 先构建 SDK，其导出的 CC_API 目标被各层链接
+
+# ===== 引入本地 libdatachannel 源码 =====
+# 必须放在 CC_SDK 之后：它依赖的 ssl/crypto target 由 CC_SDK 的 openssl-cmake 提供
+include(FetchContent)
+set(NO_EXAMPLES ON CACHE BOOL "" FORCE)
+set(NO_TESTS    ON CACHE BOOL "" FORCE)
+set(NO_MEDIA    ON CACHE BOOL "" FORCE)   # 跳过 libsrtp，不再找 OpenSSL
+FetchContent_Declare(libdatachannel
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/Enviroment/libdatachannel
+    DOWNLOAD_COMMAND "")
+FetchContent_MakeAvailable(libdatachannel)
+# ========================================
 
 if(DEFINED ENV{OpenCV_DIR})
     set(OpenCV_DIR $ENV{OpenCV_DIR}) # 从环境变量接 OpenCV 安装路径
@@ -98,11 +110,13 @@ set_target_properties(api_infrastructure PROPERTIES
     AUTOUIC ON
     AUTORCC ON
 )
+target_link_libraries(api_infrastructure PUBLIC api_application CC_API Qt6::Widgets datachannel-static)
+
 target_include_directories(api_infrastructure PUBLIC
     ${API_INC_DIR}
     ${CC_API_INC}
 )
-target_link_libraries(api_infrastructure PUBLIC api_application CC_API Qt6::Widgets)
+target_link_libraries(api_infrastructure PUBLIC api_application CC_API Qt6::Widgets datachannel-static)
 
 # ============================================================
 # 6. 可执行程序：组合根装配
