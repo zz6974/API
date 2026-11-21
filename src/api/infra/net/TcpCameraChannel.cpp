@@ -1,6 +1,7 @@
 #include "api/infra/net/TcpCameraChannel.h"
 #include "api/common/Logger.h"
 #include "api/domain/Protocol.h"
+#include "CCSDP.h"
 #include <utility>
 
 namespace api::infra {
@@ -43,6 +44,23 @@ void TcpCameraChannel::SendCommand(const std::string& command) {
     if (ok) {
         LOG_DEBUG("[TcpCameraChannel] SendCommand: %s", command.c_str());
     }
+}
+
+void TcpCameraChannel::SendSdp(const std::string &sdp) {
+    std::string content = sdp;
+    if (content.empty()) {
+        // 约定占位参数：H264/96/90000 + PCMU/0/8000，后续由 FFmpeg 探测值替换
+        const std::string id = std::to_string(deviceId_);
+        CTL::SDPBuilder builder;
+        content = builder.setSessionName("Camera_" + id)
+                         .setOriginInfo("-", id)
+                         .setConnectionInfo("IN", "IP4", "127.0.0.1")
+                         .addVideoMedia(0, "H264", 96)
+                         .addAudioMedia(0, "PCMU", 0)
+                         .build();
+    }
+    SendCommand(std::string(kSendSdp) + " " + std::to_string(content.size()));
+    out_->write(content);
 }
 
 std::vector<char> TcpCameraChannel::GetLatestFrame() {

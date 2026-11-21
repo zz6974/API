@@ -126,6 +126,8 @@ add_executable(API
     src/api/AppContext.cpp
         src/api/web/controller/StaticController.cpp
         include/api/web/controller/StaticController.h
+        src/api/web/WebRTC/WebRTC.cpp
+        src/api/web/WebRTC/WebRTC.h
 )
 target_include_directories(API PUBLIC
     ${API_INC_DIR}
