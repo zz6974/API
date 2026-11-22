@@ -30,6 +30,8 @@ public:
      * @param command 指令内容
      */
     virtual void SendCommand(const std::string& command) = 0;
+
+    virtual void SendSdp(const std::string& sdp) = 0;
     /**
      * @brief 取最新一帧
      * @return 最新一帧 JPEG，无帧返回空

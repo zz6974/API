@@ -15,4 +15,11 @@ struct PhotoMeta {
     std::size_t size = 0; ///< 照片字节数
 };
 
+struct MediaInfo {
+        std::string codec;       ///< 编码名，如 "H264"
+        int clockRate = 90000;   ///< 时钟频率
+        int channels = 1;        ///< 声道数（音频）
+        int payloadType = 96;    ///< RTP 负载类型（协商约定，非解析所得）
+        std::string fmtp;        ///< 如 "profile-level-id=...;sprop-parameter-sets=..."
+    };
 } // namespace api::domain

@@ -80,7 +80,7 @@ namespace CTL {
         void SetOnMessageCallback(const OnMessageCallback& callback);
         void SetOnDataChannelOpen(const OnDataChannelOpen& callback);
         void SetOnDataChannelClose(const OnDataChannelClose& callback);
-        void SetOnConnectionCallback(const OnConnectionCallback& callback);
+        void SetOnConnectionCallback(const OnConnectionCallback& callback); 
         void SetOnErrorCallback(const OnErrorCallback& callback);
         void SetOnIceCandidateCallback(const OnIceCandidateCallback& callback);
         void SetOnLocalDescriptionCallback(const LocalDescription& callback);

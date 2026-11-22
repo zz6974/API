@@ -59,6 +59,14 @@ public:
      */
     void SendCommand(const std::string& command) override;
     /**
+     * @brief 向终端下发 SDP（多行文本）
+     *
+     * 线格式：SEND_SDP <字节长度>\n<SDP 原文>
+     * SDP 通常由 CTL::SDPBuilder::build() 生成（\r\n 行尾）。
+     * @param sdp 完整 SDP 文本
+     */
+    void SendSdp(const std::string& sdp) override;
+    /**
      * @brief 取最新帧
      * @return 队列尾部最新帧（无帧返回空）
      */

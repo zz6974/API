@@ -21,5 +21,7 @@ inline constexpr const char* kLoginFail   = "LOGIN_FAIL";   ///< 登录失败
 inline constexpr const char* kStreamStart = "STREAM_START"; ///< 开始推流
 inline constexpr const char* kStreamStop  = "STREAM_STOP";  ///< 停止推流
 inline constexpr const char* kTakePhoto   = "TAKE_PHOTO";   ///< 拍照
+inline constexpr const char* kSendSdp   = "SEND_SDP";   ///< 发送 SDP
+
 
 } // namespace api::domain::protocol
