@@ -19,7 +19,8 @@ add_subdirectory(CC_SDK) # 先构建 SDK，其导出的 CC_API 目标被各层�
 include(FetchContent)
 set(NO_EXAMPLES ON CACHE BOOL "" FORCE)
 set(NO_TESTS    ON CACHE BOOL "" FORCE)
-set(NO_MEDIA    ON CACHE BOOL "" FORCE)   # 跳过 libsrtp，不再找 OpenSSL
+set(NO_MEDIA    OFF CACHE BOOL "" FORCE)   # 启用媒体：RTC_ENABLE_MEDIA=1（H264 打包依赖）
+set(ENABLE_OPENSSL OFF CACHE BOOL "" FORCE) # libsrtp 先用内置 cipher，避开系统 OpenSSL 查找
 FetchContent_Declare(libdatachannel
     SOURCE_DIR     ${CMAKE_SOURCE_DIR}/Enviroment/libdatachannel
     DOWNLOAD_COMMAND "")

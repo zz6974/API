@@ -44,9 +44,9 @@ public:
     void SetRemoteDescription(const std::string& sdp);
     void AddRemoteCandidate(const std::string& candidate);
 
-    void OnBind(const RTCBind& bind);
-
+    //信令发送函数
     bool SendSignal(const std::string& json);
+    //datachannel发送函数
     bool SendText(const std::string& text);
     bool SendBinary(const void* data, size_t size);
 
@@ -55,6 +55,8 @@ private:
     void SetupPeerConnection();
     std::shared_ptr<rtc::PeerConnection> m_pc;
     std::shared_ptr<rtc::DataChannel> m_dc;
+    std::shared_ptr<rtc::Track> m_track;
+    rtc::Description::Type m_Type;
     std::atomic<bool> m_Running;
     CTL::WebSocketServer web_server;
     CTL::WSBind m_bind;
